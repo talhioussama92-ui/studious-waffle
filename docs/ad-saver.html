@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ad Saver</title>
+</head>
+<body>
+    <div id="ad-content"></div>
+   
+    <script>
+        // Function to save ad content to localStorage
+        async function saveAdContent() {
+            try {
+                // Fetch the ad page
+                const response = await fetch('https://www.doorsonlineuk.co.uk/fire-doors/?gad_source=5&gad_campaignid=21898817238&gclid=EAIaIQobChMIu7aMjrGRkwMVl4ZQBh0PdRaDEAEYASAAEgKfkfD_BwE');
+                const html = await response.text();
+               
+                // Parse HTML to extract main ad content
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+               
+                // Extract key ad elements (adjust selectors as needed)
+                const adElements = doc.querySelectorAll('.product, .fire-door, .hero, [class*="product"], [class*="door"], main, .container');
+                let adHTML = '';
+               
+                adElements.forEach(el => {
+                    if (el && el.innerHTML) {
+                        adHTML += el.outerHTML;
+                    }
+                });
+               
+                // Clean up and save
+                const cleanAd = adHTML.substring(0, 50000); // Limit size
+                localStorage.setItem('saved_ad_doorsuk', JSON.stringify({
+                    html: cleanAd,
+                    timestamp: Date.now(),
+                    url: window.location.href
+                }));
+               
+                document.getElementById('ad-content').innerHTML = `
+                    <div style="padding:20px; background:#4CAF50; color:white; text-align:center;">
+                        ✅ Ad Saved Successfully!<br>
+                        <small>Visit your blog to see the ad</small>
+                    </div>
+                `;
+               
+                // Auto-redirect after 3 seconds
+                setTimeout(() => {
+                    window.close();
+                }, 3000);
+               
+            } catch (error) {
+                document.getElementById('ad-content').innerHTML = `
+                    <div style="padding:20px; background:#f44336; color:white; text-align:center;">
+                        ❌ Error saving ad. Try again.
+                    </div>
+                `;
+                console.error('Error:', error);
+            }
+        }
+       
+        // Save ad when page loads
+        window.onload = saveAdContent;
+    </script>
+</body>
+</html>
